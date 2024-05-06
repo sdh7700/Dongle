@@ -7,8 +7,12 @@ public class GameManager : MonoBehaviour
     public Dongle lastDongle;
     public GameObject donglePrefab;
     public Transform dongleGroup;
+    public GameObject effectPrefab;
+    public Transform effectGroup;
 
+    public int score;
     public int maxLevel;
+    public bool isOver;
 
     void Awake()
     {
@@ -23,13 +27,21 @@ public class GameManager : MonoBehaviour
 
     Dongle GetDongle() // 다음 동글을 가져올 때 동글을 생성해 줌
     {
-        GameObject instant = Instantiate(donglePrefab, dongleGroup); // dongleGroup이라는 부모 지정
-        Dongle instantDongel = instant.GetComponent<Dongle>();
+        // 이펙트 생성
+        GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
+        ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
+
+        // 동글 생성
+        GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup); // dongleGroup이라는 부모 지정
+        Dongle instantDongel = instantDongleObj.GetComponent<Dongle>();
+        instantDongel.effect = instantEffect;
         return instantDongel;
     }
 
     void NextDongle() // 다음 동글을 가지고 와주세요
     {
+        if (isOver)
+            return;
         Dongle newDongle = GetDongle();
         lastDongle = newDongle;
         lastDongle.manager = this;
@@ -64,5 +76,34 @@ public class GameManager : MonoBehaviour
             return;
         lastDongle.Drop();
         lastDongle = null; // 플레이어 손을 떠났으면 비워줌
+    }
+
+    // 화면의 동글들을 모두 지우면서 점수로 환산
+    public void GameOver()
+    {
+        if (isOver)
+            return;
+
+        isOver = true;
+
+        StartCoroutine("GameOverRoutine");
+    }
+
+    IEnumerator GameOverRoutine()
+    {
+        // 1. 장면 안에 활성화 되어있는 모든 동글 가져오기
+        Dongle[] dongles = GameObject.FindObjectsOfType<Dongle>();
+
+        // 2. 지우기 전에 모든 동글의 물리효과 비활성화
+        for(int i = 0; i<dongles.Length; i++)
+        {
+            dongles[i].rigid.simulated = false;
+        }
+        // 3. 1번의 목록을 하나씩 접근해서 가져오기
+        for (int i = 0; i < dongles.Length; i++)
+        {
+            dongles[i].Hide(Vector3.up * 100);
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 }

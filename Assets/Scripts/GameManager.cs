@@ -10,6 +10,12 @@ public class GameManager : MonoBehaviour
     public GameObject effectPrefab;
     public Transform effectGroup;
 
+    public AudioSource bgmPlayer;
+    public AudioSource[] sfxPlayer;
+    public AudioClip[] sfxClip;
+    public enum Sfx { LevelUp, Next, Attach, Button, Over};
+    int sfxCursor;
+
     public int score;
     public int maxLevel;
     public bool isOver;
@@ -22,6 +28,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        bgmPlayer.Play();
         NextDongle();
     }
 
@@ -48,6 +55,7 @@ public class GameManager : MonoBehaviour
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
 
+        SfxPlay(Sfx.Next);
         StartCoroutine("WaitNext");
     }
 
@@ -105,5 +113,33 @@ public class GameManager : MonoBehaviour
             dongles[i].Hide(Vector3.up * 100);
             yield return new WaitForSeconds(0.1f);
         }
+
+        yield return new WaitForSeconds(1f); // 1초정도 쉬고
+        SfxPlay(Sfx.Over);
+    }
+
+    public void SfxPlay(Sfx type)
+    {
+        switch (type)
+        {
+            case Sfx.LevelUp:
+                sfxPlayer[sfxCursor].clip = sfxClip[Random.Range(0, 3)];
+                break;
+            case Sfx.Next:
+                sfxPlayer[sfxCursor].clip = sfxClip[3];
+                break;
+            case Sfx.Attach: // 사물이 부딪힐 때 나는 소리
+                sfxPlayer[sfxCursor].clip = sfxClip[4];
+                break;
+            case Sfx.Button:
+                sfxPlayer[sfxCursor].clip = sfxClip[5];
+                break;
+            case Sfx.Over:
+                sfxPlayer[sfxCursor].clip = sfxClip[6];
+                break;
+        }
+
+        sfxPlayer[sfxCursor].Play();
+        sfxCursor = (sfxCursor + 1) % sfxPlayer.Length;
     }
 }

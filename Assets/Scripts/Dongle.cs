@@ -9,6 +9,7 @@ public class Dongle : MonoBehaviour
     public int level;
     public bool isDrag;
     public bool isMerge;
+    public bool isAttach;
 
     public Rigidbody2D rigid;
     CircleCollider2D circle;
@@ -62,6 +63,24 @@ public class Dongle : MonoBehaviour
     {
         isDrag = false; // Drag 끝
         rigid.simulated = true; // 물리효과 On
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        StartCoroutine("AttachRoutine");
+    }
+
+    IEnumerator AttachRoutine()
+    {
+        if (isAttach)
+        {
+            yield break; // 코루틴 탈출 키워드
+        }
+        isAttach = true;
+        manager.SfxPlay(GameManager.Sfx.Attach);
+        yield return new WaitForSeconds(0.2f); // 충돌 후 얼만큼 잠굴 것이냐
+
+        isAttach = false;
     }
 
     void OnCollisionStay2D(Collision2D collision) // 물리 충돌 중일 때 지속 발생
@@ -146,6 +165,7 @@ public class Dongle : MonoBehaviour
 
         anim.SetInteger("Level", level + 1);
         EffectPlay();
+        manager.SfxPlay(GameManager.Sfx.LevelUp);
 
         yield return new WaitForSeconds(0.3f); // 시간차를 두고 레벨업 필요(레벨 1높은게 겹쳐져있을 경우 고려)
         level++;

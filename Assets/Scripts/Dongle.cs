@@ -31,6 +31,26 @@ public class Dongle : MonoBehaviour
         anim.SetInteger("Level", level); // Level 파라미터에 level 변수 넘겨줌
     }
 
+    void OnDisable() // 오브젝트 비 활성화 될 때 실행됨
+    {
+        // 동글 속성 초기화
+        level = 0;
+        isDrag = false;
+        isMerge = false;
+        isAttach = false;
+
+        // 동글 트랜스폼 초기화
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = Vector3.zero;
+
+        // 동글 물리 초기화
+        rigid.simulated = false;
+        rigid.velocity = Vector2.zero;
+        rigid.angularVelocity = 0;
+        circle.enabled = true; // 서클콜라이더 다시 활성화
+    }
+
     void Update()
     {
         if (isDrag)

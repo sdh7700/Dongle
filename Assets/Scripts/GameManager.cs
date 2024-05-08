@@ -4,12 +4,20 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public Dongle lastDongle;
+    // Dongle
     public GameObject donglePrefab;
     public Transform dongleGroup;
+    public List<Dongle> donglePool;
+    // Effect
     public GameObject effectPrefab;
     public Transform effectGroup;
+    public List<ParticleSystem> effectPool;
 
+    [Range(1, 30)] // Inspector에서 최소 최대 설정
+    public int poolSize;
+    public int poolCursor;
+    public Dongle lastDongle;
+    
     public AudioSource bgmPlayer;
     public AudioSource[] sfxPlayer;
     public AudioClip[] sfxClip;
@@ -22,7 +30,14 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        Application.targetFrameRate = 60;    
+        Application.targetFrameRate = 60;
+
+        donglePool = new List<Dongle>();
+        effectPool = new List<ParticleSystem>();
+        for(int i = 0; i < poolSize; i++)
+        {
+            MakeDongle();
+        }
     }
 
     // Start is called before the first frame update
@@ -32,26 +47,46 @@ public class GameManager : MonoBehaviour
         NextDongle();
     }
 
-    Dongle GetDongle() // 다음 동글을 가져올 때 동글을 생성해 줌
+    // 동글 생성
+    Dongle MakeDongle()
     {
         // 이펙트 생성
         GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
+        instantEffectObj.name = "Effect " + effectPool.Count;
         ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
+        effectPool.Add(instantEffect);
 
         // 동글 생성
         GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup); // dongleGroup이라는 부모 지정
+        instantDongleObj.name = "Dongle " + donglePool.Count;
         Dongle instantDongel = instantDongleObj.GetComponent<Dongle>();
+        instantDongel.manager = this;
         instantDongel.effect = instantEffect;
+        donglePool.Add(instantDongel);
+
         return instantDongel;
+    }
+
+    Dongle GetDongle() // 다음 동글을 가져올 때 동글을 생성해 줌
+    {
+        for(int i=0; i<donglePool.Count; i++)
+        {
+            poolCursor = (poolCursor + 1) % donglePool.Count;
+            if (!donglePool[poolCursor].gameObject.activeSelf) // 비 활성화된 동글 찾기
+            {
+                return donglePool[poolCursor];
+            }
+        }
+
+        return MakeDongle();
     }
 
     void NextDongle() // 다음 동글을 가지고 와주세요
     {
         if (isOver)
             return;
-        Dongle newDongle = GetDongle();
-        lastDongle = newDongle;
-        lastDongle.manager = this;
+
+        lastDongle = GetDongle();
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
 

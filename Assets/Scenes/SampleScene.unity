@@ -909,11 +909,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbd6d44835ef33f4fbf8932c5cead7fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lastDongle: {fileID: 0}
   donglePrefab: {fileID: 5759648308936248112, guid: e95a460ce98a4714087feea3f6bf5605, type: 3}
   dongleGroup: {fileID: 1426512888}
+  donglePool: []
   effectPrefab: {fileID: 6090371471830933527, guid: 45481bb318b419e40817afda350a7d19, type: 3}
   effectGroup: {fileID: 265679902}
+  effectPool: []
+  poolSize: 3
+  poolCursor: 0
+  lastDongle: {fileID: 0}
   bgmPlayer: {fileID: 1394974233}
   sfxPlayer:
   - {fileID: 1289688206}
